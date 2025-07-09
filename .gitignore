@@ -1,0 +1,7 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+/generated/prisma
+
+writer-service/sodium-platform-464118-c6-d47223e92aea.json

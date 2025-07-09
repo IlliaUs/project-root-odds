@@ -1,0 +1,47 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Sport {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  teams   Team[]
+}
+
+model Team {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  homeGames Game[]   @relation("HomeTeam")
+  awayGames Game[]   @relation("AwayTeam")
+  sportId   Int
+  sport     Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+}
+
+model Game {
+  id           Int       @id @default(autoincrement())
+  startTime    DateTime
+  status       String    @default("scheduled")
+  homeTeamId   Int
+  awayTeamId   Int
+  homeTeam     Team      @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam     Team      @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  odds         Odd[]
+
+  @@unique([homeTeamId, awayTeamId, startTime]) // составной уникальный индекс
+}
+
+model Odd {
+  id         Int     @id @default(autoincrement())
+  bookmaker  String
+  market     String
+  outcome    String
+  price Decimal @db.Decimal(10, 2)
+  gameId     Int
+  game       Game    @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
